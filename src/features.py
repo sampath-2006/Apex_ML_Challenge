@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from rapidfuzz import fuzz
 from rapidfuzz.distance import JaroWinkler
+import jellyfish
 
 
 # ─── Feature column order (must be consistent between train & predict) ────────
@@ -12,10 +13,11 @@ FEATURE_COLUMNS = [
     'name_ratio', 'name_partial_ratio', 'name_token_sort_ratio',
     'name_token_set_ratio', 'name_jaro_winkler', 'name_jaccard',
     'name_shared_count', 'name_len_ratio',
-    # Address features (7)
+    'name_soundex_match', 'name_metaphone_match',
+    # Address features (9)
     'has_address_both', 'addr_ratio', 'addr_partial_ratio',
     'addr_token_sort_ratio', 'addr_jaccard', 'addr_shared_count',
-    'addr_number_jaccard',
+    'addr_number_jaccard', 'addr_zip_match', 'addr_pobox_match'
 ]
 
 
@@ -35,6 +37,16 @@ def _safe_len_ratio(a, b):
 
 
 _NUM_RE = re.compile(r'\d+')
+_ZIP_RE = re.compile(r'\b\d{5,6}\b')
+_POBOX_RE = re.compile(r'\b(?:po box|p o box|box)\s*(\d+)\b')
+
+def _match_score(set1, set2):
+    """0.5 if missing, 1.0 if match, 0.0 if conflict."""
+    if not set1 or not set2:
+        return 0.5
+    if set1 & set2:
+        return 1.0
+    return 0.0
 
 
 def compute_pair_features(name1, name2, addr1, addr2):
@@ -54,6 +66,13 @@ def compute_pair_features(name1, name2, addr1, addr2):
     feats['name_token_sort_ratio'] = fuzz.token_sort_ratio(n1, n2) / 100.0
     feats['name_token_set_ratio']  = fuzz.token_set_ratio(n1, n2) / 100.0
     feats['name_jaro_winkler']    = JaroWinkler.similarity(n1, n2)
+
+    if n1 and n2:
+        feats['name_soundex_match']   = 1.0 if jellyfish.soundex(n1) == jellyfish.soundex(n2) else 0.0
+        feats['name_metaphone_match'] = 1.0 if jellyfish.metaphone(n1) == jellyfish.metaphone(n2) else 0.0
+    else:
+        feats['name_soundex_match']   = 0.0
+        feats['name_metaphone_match'] = 0.0
 
     # ── Name token-level ──────────────────────────────────────────────────
     t1 = set(n1.split()) if n1 else set()
@@ -79,6 +98,14 @@ def compute_pair_features(name1, name2, addr1, addr2):
         nums1 = set(_NUM_RE.findall(a1))
         nums2 = set(_NUM_RE.findall(a2))
         feats['addr_number_jaccard'] = _safe_jaccard(nums1, nums2)
+        
+        zips1 = set(_ZIP_RE.findall(a1))
+        zips2 = set(_ZIP_RE.findall(a2))
+        feats['addr_zip_match'] = _match_score(zips1, zips2)
+        
+        pobox1 = set(_POBOX_RE.findall(a1))
+        pobox2 = set(_POBOX_RE.findall(a2))
+        feats['addr_pobox_match'] = _match_score(pobox1, pobox2)
     else:
         feats['addr_ratio'] = 0.0
         feats['addr_partial_ratio'] = 0.0
@@ -86,6 +113,8 @@ def compute_pair_features(name1, name2, addr1, addr2):
         feats['addr_jaccard'] = 0.0
         feats['addr_shared_count'] = 0.0
         feats['addr_number_jaccard'] = 0.0
+        feats['addr_zip_match'] = 0.5
+        feats['addr_pobox_match'] = 0.5
 
     return feats
 

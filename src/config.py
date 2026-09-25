@@ -29,12 +29,12 @@ MODEL_PATH = os.path.join(MODEL_DIR, "lgbm_model.txt")
 THRESHOLD_PATH = os.path.join(MODEL_DIR, "threshold.txt")
 
 # ─── Blocking Parameters ─────────────────────────────────────────────────────
-BLOCKING_TOP_K = 20            # Max candidates per S1 entity
+BLOCKING_TOP_K = 100           # Max candidates per S1 entity
 BLOCKING_MAX_DF_RATIO = 0.005  # Ignore tokens in >0.5% of docs (too common)
 BLOCKING_CHUNK_SIZE = 5000     # S1 entities per chunk during blocking
 
 # ─── Training Parameters ─────────────────────────────────────────────────────
-TRAIN_SAMPLE_SIZE = 10000      # S1 entities to sample for training
+TRAIN_SAMPLE_SIZE = 100000     # S1 entities to sample for training
 VAL_RATIO = 0.2                # Fraction held out for validation
 NEGATIVE_RATIO = 3             # Max negative pairs per positive pair
 
@@ -49,7 +49,7 @@ LGBM_PARAMS = {
     'bagging_freq': 5,
     'verbose': -1,
 }
-LGBM_NUM_ROUNDS = 500
+LGBM_NUM_ROUNDS = 1500
 LGBM_EARLY_STOPPING = 50
 
 # ─── Threshold ────────────────────────────────────────────────────────────────

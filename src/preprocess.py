@@ -121,8 +121,8 @@ def preprocess_dataframe(df):
     df['name_clean'] = df['business_name'].apply(preprocess_name)
     df['addr_clean'] = df['business_address'].apply(preprocess_address)
 
-    # Blocking tokens (name only — addresses are too noisy for blocking)
-    df['blocking_text'] = df['name_clean'].apply(
+    # Blocking tokens (name + address)
+    df['blocking_text'] = (df['name_clean'].fillna('') + ' ' + df['addr_clean'].fillna('')).apply(
         lambda x: ' '.join(get_blocking_tokens(x))
     )
 

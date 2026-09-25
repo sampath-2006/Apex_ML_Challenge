@@ -69,6 +69,18 @@
   - `output/matching_results.tsv`
   - `output/candidate_pairs.tsv`
 
+## Day 2 — Sept 26, 2026
+
+### 02:00 IST — Feature & Sample Size Upgrades
+- **v2 Implemented**: Added phonetic features (Soundex, Metaphone) using `jellyfish`.
+- **v3 Implemented**: Added specific parsing and matching for Zip Codes (5-6 digits) and PO Box numbers.
+- **Config**: Increased `TRAIN_SAMPLE_SIZE` from 10k to 100k to let the model generalize better. Increased LightGBM rounds from 500 to 1500.
+
+### 02:15 IST — The Blocking Breakthrough
+- **Discovery**: Realized that the initial training run had a `Blocking recall` of only **0.43**. We were throwing away 57% of true positive matches before LightGBM even saw them!
+- **Fix**: Modified `src/preprocess.py` to include `addr_clean` tokens in the blocking index. Changed `BLOCKING_TOP_K` from 20 to 100 in `config.py`.
+- **Result**: Validation F₀.₅ score skyrocketed from **0.5609** to **0.9481**! Model peaked at exactly 1500 rounds with threshold 0.85. Address features (`addr_jaccard`) dominate the importance list.
+
 ---
 
 ## Submissions Log
@@ -82,7 +94,7 @@
 ## Upgrade Roadmap
 
 - [x] **v1**: String similarity + LightGBM (Score: 0.480)
-- [ ] **v2**: Add phonetic features (Soundex, Metaphone)
-- [ ] **v3**: Better address parsing, component-level matching
+- [x] **v2**: Add phonetic features (Soundex, Metaphone)
+- [x] **v3**: Better address parsing, component-level matching
 - [ ] **v4**: Small encoder embeddings as additional features
 - [ ] **v5**: Ensemble / stacking / threshold refinement

@@ -10,6 +10,7 @@ Given business records from 3 independent data sources with noisy, inconsistent 
 
 ### 🏆 Current Leaderboard (Public)
 - **V1 Baseline (LightGBM + Lexical):** `0.480` F₀.₅ Score
+- **V3 Pipeline (100k + Improved Blocking):** `0.948` F₀.₅ Score (Validation)
 
 ## Pipeline Architecture
 
@@ -31,12 +32,12 @@ Raw TSV Data → Preprocessing → Blocking → Feature Engineering → LightGBM
 - Frequency filtering: ignores tokens in >0.5% of docs (too common)
 
 ### Stage 3: Feature Engineering (`src/features.py`)
-15 string-similarity features, **zero embeddings**:
+19 string-similarity features, **zero embeddings**:
 
 | Category | Features |
 |---|---|
-| **Name (8)** | fuzz.ratio, partial_ratio, token_sort_ratio, token_set_ratio, Jaro-Winkler, Jaccard, shared token count, length ratio |
-| **Address (7)** | has_both_addresses, fuzz.ratio, partial_ratio, token_sort_ratio, Jaccard, shared token count, numeric token Jaccard |
+| **Name (10)** | fuzz.ratio, partial_ratio, token_sort_ratio, token_set_ratio, Jaro-Winkler, Jaccard, shared token count, length ratio, Soundex match, Metaphone match |
+| **Address (9)** | has_both_addresses, fuzz.ratio, partial_ratio, token_sort_ratio, Jaccard, shared token count, numeric token Jaccard, Zip Code match, PO Box match |
 
 ### Stage 4: Matching (`src/matcher.py`)
 - LightGBM binary classifier
