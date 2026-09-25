@@ -8,6 +8,9 @@ Given business records from 3 independent data sources with noisy, inconsistent 
 - **Source 2 & 3** = noisy candidate sources
 - **Goal**: For each S1 entity, find all matching S2/S3 records
 
+### 🏆 Current Leaderboard (Public)
+- **V1 Baseline (LightGBM + Lexical):** `0.480` F₀.₅ Score
+
 ## Pipeline Architecture
 
 ```

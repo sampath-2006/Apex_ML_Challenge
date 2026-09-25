@@ -75,13 +75,13 @@
 
 | # | Time | F₀.₅ (Public) | Notes |
 |---|---|---|---|
-| 1 | — | — | v1 baseline (pending) |
+| 1 | 26 Sep 26, 01:13 AM IST | **0.480** | v1 baseline (LightGBM + Lexical features only) |
 
 ---
 
 ## Upgrade Roadmap
 
-- [ ] **v1**: String similarity + LightGBM (current)
+- [x] **v1**: String similarity + LightGBM (Score: 0.480)
 - [ ] **v2**: Add phonetic features (Soundex, Metaphone)
 - [ ] **v3**: Better address parsing, component-level matching
 - [ ] **v4**: Small encoder embeddings as additional features
