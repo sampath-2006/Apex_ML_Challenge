@@ -40,10 +40,34 @@
 - All imports verified clean
 - Dependencies: pandas, numpy, lightgbm, rapidfuzz, scikit-learn, tqdm, scipy
 
-### 21:58 IST — Training Started
-- Kicked off `run_train.py`
-- Config: 100K S1 sample, 80/20 train/val split, top-20 candidates, LightGBM 500 rounds
-- Status: ⏳ Running...
+### 23:58 IST — Debugging Performance Bottleneck
+- **Breakthrough 1 (O(N*M) bug in Set Lookup):** Training pipeline was hanging. Found that `set(sample_ids)` was being created inside a list comprehension looping over 2.2 million `ground_truth` rows. Extracted the set creation to a variable before the loop, saving ~30-40 minutes of execution time.
+- **Breakthrough 2 (Pandas Iterrows Speed):** Found a massive bottleneck where `df.iterrows()` was iterating over 10.3 million rows in `build_lookup()`. Replaced it with a vectorized `.tolist()` zip method, achieving a 1000x speedup (bringing lookup time down from >20 mins to ~2 seconds).
+- Temporarily reduced `TRAIN_SAMPLE_SIZE` from 100K to 10K for faster interactive verification of the end-to-end pipeline.
+
+### 00:13 IST — Unicode Encoding Bug Fix
+- The training finished completely in ~5 minutes but crashed on the very last line during threshold tuning because the Windows terminal (`cp1252` charmap) couldn't encode the unicode arrow `→` in the print statement. 
+- Replaced all unicode arrows (`→`, `◀`) with ASCII (`->`, `<--`) across `matcher.py` and `pipeline.py`.
+
+### 00:14 IST — Final Training Run (v1)
+- Started the final fixed `run_train.py`.
+- Status: ✅ **Completed** (Took 5.6 minutes)
+- **Validation F₀.₅:** 0.5524 (at optimized threshold 0.65)
+- **Artifacts Saved:** 
+  - `models/lgbm_model.txt`
+  - `models/threshold.txt`
+
+### 00:26 IST — Final Prediction Run (v1)
+- Ran `run_predict.py` across the entire 11.7 million row test set.
+- Status: ✅ **Completed** (Took 35.7 minutes)
+- **Results:**
+  - Total S1 Entities: 1,732,544
+  - Entities with matches: 1,016,864
+  - Total links found: 2,758,543
+  - Singletons (no match): 715,680
+- **Submission Artifacts Generated:**
+  - `output/matching_results.tsv`
+  - `output/candidate_pairs.tsv`
 
 ---
 

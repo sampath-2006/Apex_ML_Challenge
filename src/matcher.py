@@ -89,8 +89,8 @@ class EntityMatcher:
                 preds.setdefault(s1_id, set())
 
             f05 = evaluate_predictions(preds, val_gt)
-            tag = " ◀ best" if f05 > best_f05 else ""
-            print(f"      threshold {thr:.2f}  →  F_0.5 = {f05:.4f}{tag}")
+            tag = " <-- best" if f05 > best_f05 else ""
+            print(f"      threshold {thr:.2f}  ->  F_0.5 = {f05:.4f}{tag}")
             if f05 > best_f05:
                 best_f05, best_thr = f05, thr
 
@@ -106,8 +106,8 @@ class EntityMatcher:
         self.model.save_model(model_path)
         with open(threshold_path, 'w') as f:
             f.write(str(self.threshold))
-        print(f"    Model     → {model_path}")
-        print(f"    Threshold → {threshold_path}")
+        print(f"    Model     -> {model_path}")
+        print(f"    Threshold -> {threshold_path}")
 
     def load(self, model_path=None, threshold_path=None):
         model_path = model_path or config.MODEL_PATH

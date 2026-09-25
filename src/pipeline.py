@@ -50,13 +50,10 @@ def parse_ground_truth(gt_df):
 
 def build_lookup(df):
     """Build {entity_id: {'name_clean': …, 'addr_clean': …}} for feature computation."""
-    lookup = {}
-    for _, row in df.iterrows():
-        lookup[row['entity_id']] = {
-            'name_clean': row.get('name_clean', ''),
-            'addr_clean': row.get('addr_clean', ''),
-        }
-    return lookup
+    names = df['name_clean'].tolist()
+    addrs = df['addr_clean'].tolist()
+    ids = df['entity_id'].tolist()
+    return {eid: {'name_clean': n, 'addr_clean': a} for eid, n, a in zip(ids, names, addrs)}
 
 
 def create_training_pairs(candidates, ground_truth, neg_ratio=None):
@@ -95,7 +92,7 @@ def train_pipeline():
     """Full training pipeline: load → preprocess → block → features → LightGBM → threshold."""
     t0 = time.time()
     print("=" * 65)
-    print("  ENTITY RESOLUTION PIPELINE — TRAINING")
+    print("  ENTITY RESOLUTION PIPELINE - TRAINING")
     print("=" * 65)
 
     # 1 ── Load ────────────────────────────────────────────────────────────
@@ -128,7 +125,8 @@ def train_pipeline():
     print("\n  Blocking / Candidate Generation...")
     candidates = generate_candidates(s1, s23)
 
-    sample_gt = {k: v for k, v in ground_truth.items() if k in set(sample_ids)}
+    sample_ids_set = set(sample_ids)
+    sample_gt = {k: v for k, v in ground_truth.items() if k in sample_ids_set}
     br = evaluate_blocking_recall(candidates, sample_gt)
     print(f"\n  Blocking recall (sample): {br:.4f}")
 
@@ -185,7 +183,7 @@ def train_pipeline():
     for s1_id in val_gt:
         preds.setdefault(s1_id, set())
     f05 = evaluate_predictions(preds, val_gt)
-    print(f"\n  ★ Validation F_0.5 = {f05:.4f}")
+    print(f"\n  * Validation F_0.5 = {f05:.4f}")
 
     # 11 ── Save ───────────────────────────────────────────────────────────
     print("\n  Saving model...")
@@ -206,7 +204,7 @@ def predict_pipeline():
     """Full prediction pipeline: load → preprocess → block → features → predict → write."""
     t0 = time.time()
     print("=" * 65)
-    print("  ENTITY RESOLUTION PIPELINE — PREDICTION")
+    print("  ENTITY RESOLUTION PIPELINE - PREDICTION")
     print("=" * 65)
 
     # 1 ── Load model ──────────────────────────────────────────────────────
@@ -303,6 +301,6 @@ def predict_pipeline():
     elapsed = time.time() - t0
     print(f"\n{'=' * 65}")
     print(f"  Prediction complete in {elapsed/60:.1f} min")
-    print(f"  → {config.MATCHING_OUTPUT}")
-    print(f"  → {config.CANDIDATE_OUTPUT}")
+    print(f"  -> {config.MATCHING_OUTPUT}")
+    print(f"  -> {config.CANDIDATE_OUTPUT}")
     print(f"{'=' * 65}")

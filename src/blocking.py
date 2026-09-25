@@ -89,7 +89,7 @@ def generate_candidates(s1_df, s23_df, top_k=None, chunk_size=None):
         s23_c = s23_df[s23_df['country'] == country].reset_index(drop=True)
 
         if len(s23_c) == 0:
-            print(f"    No S2/S3 records — all {len(s1_c)} S1 entities become singletons.")
+            print(f"    No S2/S3 records - all {len(s1_c)} S1 entities become singletons.")
             for eid in s1_c['entity_id']:
                 all_candidates[eid] = []
             continue
@@ -104,7 +104,7 @@ def generate_candidates(s1_df, s23_df, top_k=None, chunk_size=None):
             vectorizer, s23_matrix = build_blocking_index(s23_texts)
         except ValueError:
             # Fallback if all tokens are too common or too rare
-            print("    Vectorizer failed with default params — using min_df=1, max_df=1.0")
+            print("    Vectorizer failed with default params - using min_df=1, max_df=1.0")
             vectorizer, s23_matrix = build_blocking_index(s23_texts, min_df=1, max_df=1.0)
 
         s1_texts = s1_c['blocking_text'].fillna('').tolist()

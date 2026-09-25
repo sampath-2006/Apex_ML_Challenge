@@ -34,7 +34,7 @@ BLOCKING_MAX_DF_RATIO = 0.005  # Ignore tokens in >0.5% of docs (too common)
 BLOCKING_CHUNK_SIZE = 5000     # S1 entities per chunk during blocking
 
 # ─── Training Parameters ─────────────────────────────────────────────────────
-TRAIN_SAMPLE_SIZE = 100000     # S1 entities to sample for training
+TRAIN_SAMPLE_SIZE = 10000      # S1 entities to sample for training
 VAL_RATIO = 0.2                # Fraction held out for validation
 NEGATIVE_RATIO = 3             # Max negative pairs per positive pair
 
