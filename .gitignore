@@ -14,6 +14,7 @@ build/
 # Model artifacts
 models/
 output/
+submissions/
 
 # IDE
 .vscode/
