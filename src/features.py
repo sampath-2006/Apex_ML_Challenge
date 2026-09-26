@@ -6,14 +6,29 @@ from rapidfuzz import fuzz
 from rapidfuzz.distance import JaroWinkler
 import jellyfish
 
+import os
+# Force transformers to only use PyTorch and avoid loading TensorFlow (which causes Protobuf crashes)
+os.environ["USE_TF"] = "0"
+os.environ["USE_TORCH"] = "1"
+
+try:
+    from sentence_transformers import SentenceTransformer
+    # Load a tiny, fast model for CPU
+    _ST_MODEL = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
+    _EMB_CACHE = {}  # Cache string -> embedding to save massive CPU time
+except ImportError:
+    _ST_MODEL = None
+    _EMB_CACHE = {}
+
 
 # ─── Feature column order (must be consistent between train & predict) ────────
 FEATURE_COLUMNS = [
-    # Name features (8)
+    # Name features (11)
     'name_ratio', 'name_partial_ratio', 'name_token_sort_ratio',
     'name_token_set_ratio', 'name_jaro_winkler', 'name_jaccard',
     'name_shared_count', 'name_len_ratio',
     'name_soundex_match', 'name_metaphone_match',
+    'name_embedding_cosine',
     # Address features (9)
     'has_address_both', 'addr_ratio', 'addr_partial_ratio',
     'addr_token_sort_ratio', 'addr_jaccard', 'addr_shared_count',
@@ -134,6 +149,19 @@ def compute_features_batch(pairs, s1_lookup, s23_lookup, show_progress=True):
     n = len(pairs)
     X = np.zeros((n, len(FEATURE_COLUMNS)), dtype=np.float32)
 
+    # 1. Pre-compute missing embeddings for the batch
+    if _ST_MODEL is not None:
+        unique_names = set()
+        for s1_id, s23_id in pairs:
+            if n1 := s1_lookup.get(s1_id, {}).get('name_clean', ''): unique_names.add(n1)
+            if n2 := s23_lookup.get(s23_id, {}).get('name_clean', ''): unique_names.add(n2)
+        
+        missing = list(unique_names - set(_EMB_CACHE.keys()))
+        if missing:
+            embs = _ST_MODEL.encode(missing, batch_size=256, show_progress_bar=False)
+            for name, emb in zip(missing, embs):
+                _EMB_CACHE[name] = emb
+
     iterator = enumerate(pairs)
     if show_progress:
         iterator = tqdm(iterator, total=n, desc="    Features", unit="pair")
@@ -141,12 +169,26 @@ def compute_features_batch(pairs, s1_lookup, s23_lookup, show_progress=True):
     for idx, (s1_id, s23_id) in iterator:
         s1  = s1_lookup.get(s1_id, {})
         s23 = s23_lookup.get(s23_id, {})
+        n1 = s1.get('name_clean', '')
+        n2 = s23.get('name_clean', '')
+        
         feats = compute_pair_features(
-            s1.get('name_clean', ''),
-            s23.get('name_clean', ''),
+            n1, n2,
             s1.get('addr_clean', ''),
             s23.get('addr_clean', ''),
         )
+        
+        # Add embedding cosine
+        cos_sim = 0.0
+        if n1 and n2 and _ST_MODEL is not None:
+            e1 = _EMB_CACHE.get(n1)
+            e2 = _EMB_CACHE.get(n2)
+            if e1 is not None and e2 is not None:
+                denom = np.linalg.norm(e1) * np.linalg.norm(e2)
+                if denom > 0:
+                    cos_sim = float(np.dot(e1, e2) / denom)
+        feats['name_embedding_cosine'] = cos_sim
+
         X[idx] = [feats[c] for c in FEATURE_COLUMNS]
 
     return X

@@ -32,11 +32,11 @@ Raw TSV Data → Preprocessing → Blocking → Feature Engineering → LightGBM
 - Frequency filtering: ignores tokens in >0.5% of docs (too common)
 
 ### Stage 3: Feature Engineering (`src/features.py`)
-19 string-similarity features, **zero embeddings**:
+20 features, combining string-similarity and semantic embeddings:
 
 | Category | Features |
 |---|---|
-| **Name (10)** | fuzz.ratio, partial_ratio, token_sort_ratio, token_set_ratio, Jaro-Winkler, Jaccard, shared token count, length ratio, Soundex match, Metaphone match |
+| **Name (11)** | fuzz.ratio, partial_ratio, token_sort_ratio, token_set_ratio, Jaro-Winkler, Jaccard, shared token count, length ratio, Soundex match, Metaphone match, **all-MiniLM-L6-v2 embedding cosine** |
 | **Address (9)** | has_both_addresses, fuzz.ratio, partial_ratio, token_sort_ratio, Jaccard, shared token count, numeric token Jaccard, Zip Code match, PO Box match |
 
 ### Stage 4: Matching (`src/matcher.py`)

@@ -82,6 +82,12 @@
 - **Result**: Validation F₀.₅ score skyrocketed from **0.5609** to **0.9481**! Model peaked at exactly 1500 rounds with threshold 0.85. Address features (`addr_jaccard`) dominate the importance list.
 - **Test Predictions Completed**: Ran `run_predict.py` with the 94.8% model. Processed 1.7M S1 entities against 10M S2/S3. Found matches for 1,662,879 entities (6.6M total links) leaving only 69k singletons. Output saved to `output/matching_results.tsv`.
 
+### 13:00 IST — V4 (Semantic Embeddings) Success!
+- **Implementation**: Bypassed TensorFlow conflicts and integrated `all-MiniLM-L6-v2` via `sentence-transformers`.
+- **Caching**: Built an LRU-style dictionary cache in `src/features.py` to extract embeddings *only* for unique strings, saving days of CPU time.
+- **Result**: `name_embedding_cosine` successfully entered the top 10 most important features! 
+- **Validation Score**: Peaked at **0.9488** (up from 0.9482) at threshold 0.80. Model training took 43.8 minutes on CPU.
+
 ---
 
 ## Submissions Log
@@ -104,5 +110,5 @@ The massive jump from 0.480 to 0.788 confirms our blocking fixes worked, but the
 - [x] **v1**: String similarity + LightGBM (Score: 0.480)
 - [x] **v2**: Add phonetic features (Soundex, Metaphone)
 - [x] **v3**: Better address parsing, component-level matching
-- [ ] **v4**: Small encoder embeddings as additional features
+- [x] **v4**: Small encoder embeddings as additional features (Score: 0.9488 Val)
 - [ ] **v5**: Ensemble / stacking / threshold refinement
