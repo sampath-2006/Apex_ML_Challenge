@@ -49,7 +49,7 @@ LGBM_PARAMS = {
     'bagging_freq': 5,
     'verbose': -1,
 }
-LGBM_NUM_ROUNDS = 1500
+LGBM_NUM_ROUNDS = 2500
 LGBM_EARLY_STOPPING = 50
 
 # ─── Threshold ────────────────────────────────────────────────────────────────

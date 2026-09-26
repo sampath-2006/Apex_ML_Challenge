@@ -34,12 +34,16 @@ ADDRESS_ABBREVIATIONS = {
     'n': 'north', 's': 'south', 'e': 'east', 'w': 'west',
     'ne': 'northeast', 'nw': 'northwest', 'se': 'southeast',
     'sw': 'southwest', 'no': 'number',
+    # French
+    'rue': 'street', 'av': 'avenue', 'blvd': 'boulevard',
+    'bd': 'boulevard', 'bp': 'box', 'cedex': 'post', 'zi': 'zone',
+    'za': 'zone',
 }
 
 # Tokens to REMOVE from business names (too generic for matching/blocking)
 NAME_REMOVE_TOKENS = {
     'llc', 'llp', 'plc', 'sa', 'sarl', 'sas', 'gmbh', 'ag',
-    'dba', 'fka', 'aka',
+    'dba', 'fka', 'aka', 'sci', 'snc', 'scop', 'scic', 'eurl',
 }
 
 # Stopwords for blocking (removed from blocking keys, kept in clean name)
@@ -51,6 +55,10 @@ BLOCKING_STOPWORDS = {
     'industries', 'international', 'association', 'foundation',
     'partners', 'consulting', 'consultants', 'management', 'systems',
     'technologies', 'global', 'india', 'us', 'usa', 'america',
+    # French
+    'le', 'la', 'les', 'de', 'des', 'du', 'un', 'une', 'et', 'en',
+    'pour', 'sur', 'dans', 'societe', 'entreprise', 'groupe', 
+    'france', 'paris',
 }
 
 

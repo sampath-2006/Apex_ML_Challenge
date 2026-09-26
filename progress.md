@@ -80,6 +80,7 @@
 - **Discovery**: Realized that the initial training run had a `Blocking recall` of only **0.43**. We were throwing away 57% of true positive matches before LightGBM even saw them!
 - **Fix**: Modified `src/preprocess.py` to include `addr_clean` tokens in the blocking index. Changed `BLOCKING_TOP_K` from 20 to 100 in `config.py`.
 - **Result**: Validation F₀.₅ score skyrocketed from **0.5609** to **0.9481**! Model peaked at exactly 1500 rounds with threshold 0.85. Address features (`addr_jaccard`) dominate the importance list.
+- **Test Predictions Completed**: Ran `run_predict.py` with the 94.8% model. Processed 1.7M S1 entities against 10M S2/S3. Found matches for 1,662,879 entities (6.6M total links) leaving only 69k singletons. Output saved to `output/matching_results.tsv`.
 
 ---
 
@@ -87,7 +88,14 @@
 
 | # | Time | F₀.₅ (Public) | Notes |
 |---|---|---|---|
+| 2 | 26 Sep 26, 11:54 AM IST | **0.788** | v3 pipeline (100k samples, improved blocking, 1500 rounds) |
 | 1 | 26 Sep 26, 01:13 AM IST | **0.480** | v1 baseline (LightGBM + Lexical features only) |
+
+## Analysis: Validation vs Public LB Drop (0.948 → 0.788)
+The massive jump from 0.480 to 0.788 confirms our blocking fixes worked, but the drop from 0.948 validation to 0.788 public test is significant. Hypotheses for the gap:
+1. **The "France" Problem (Zero-Shot):** The test set includes a massive amount of data from France, which was entirely unseen in our training data. Our LightGBM model learned thresholds optimized for English/Hindi distributions (US/India).
+2. **French Stopwords in Blocking:** Our `BLOCKING_STOPWORDS` in `preprocess.py` only contains English words! Common French words (le, la, de, societe) are not being filtered, causing false positives in the blocking phase and pushing true matches out of the top 100 candidates.
+3. **Abbreviation Bias:** Our `ADDRESS_ABBREVIATIONS` dictionary expands "st" to "street", but completely misses French address abbreviations (e.g., "rue", "blvd", "av").
 
 ---
 

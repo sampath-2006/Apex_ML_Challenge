@@ -9,8 +9,8 @@ Given business records from 3 independent data sources with noisy, inconsistent 
 - **Goal**: For each S1 entity, find all matching S2/S3 records
 
 ### 🏆 Current Leaderboard (Public)
+- **V3 Pipeline (100k + Improved Blocking):** `0.788` F₀.₅ Score (Validation: `0.948`)
 - **V1 Baseline (LightGBM + Lexical):** `0.480` F₀.₅ Score
-- **V3 Pipeline (100k + Improved Blocking):** `0.948` F₀.₅ Score (Validation)
 
 ## Pipeline Architecture
 
